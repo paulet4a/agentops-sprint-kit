@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent-Safe Repo Sprint — Harden Your Repo for AI Coding Agents in 48 Hours</title>
+  <meta name="description" content="Windsurf/Cursor/Codex ile hızlı kod yazıyorsan ama repo kontrolden çıkıyorsa, 48 saatte agent kurallarını, test gate'lerini, PR disiplinini ve güvenli çalışma protokolünü kuruyorum.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              900: '#14532d',
+            },
+            surface: {
+              950: '#0a0a0a',
+              900: '#171717',
+              800: '#262626',
+              700: '#404040',
+              600: '#525252',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    code, .font-mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+    .gradient-text {
+      background: linear-gradient(135deg, #4ade80, #22c55e, #16a34a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glow-green {
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.15), 0 0 60px rgba(34, 197, 94, 0.05);
+    }
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.1);
+    }
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .float { animation: float 4s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-surface-950 text-gray-200 antialiased">
+
+  <!-- Nav -->
+  <nav class="fixed top-0 w-full z-50 bg-surface-950/80 backdrop-blur-lg border-b border-white/5">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
+          <svg class="w-5 h-5 text-surface-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A10.97 10.97 0 0012 2C6.477 2 2 6.477 2 12s4.477 10 10 10c.77 0 1.52-.078 2.245-.226a1 1 0 00.814-.814A10.97 10.97 0 0022 12c0-1.5-.3-2.94-.838-4.262a1 1 0 00-.814-.814z"/></svg>
+        </div>
+        <span class="font-bold text-white text-lg">AgentOps<span class="text-brand-400">Sprint</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+        <a href="#who" class="hover:text-white transition">Who It's For</a>
+        <a href="#deliverables" class="hover:text-white transition">Deliverables</a>
+        <a href="#before-after" class="hover:text-white transition">Before &amp; After</a>
+        <a href="#pricing" class="hover:text-white transition">Pricing</a>
+        <a href="#faq" class="hover:text-white transition">FAQ</a>
+      </div>
+      <a href="#pricing" class="bg-brand-500 hover:bg-brand-600 text-surface-950 font-semibold px-5 py-2 rounded-lg text-sm transition">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="pt-32 pb-20 px-6 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(34,197,94,0.08)_0%,_transparent_60%)]"></div>
+    <div class="max-w-4xl mx-auto text-center relative">
+      <div class="inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-full px-4 py-1.5 text-brand-400 text-sm font-medium mb-8">
+        <span class="w-2 h-2 rounded-full bg-brand-400 pulse-slow"></span>
+        48-Hour Sprint — Limited Beta Spots
+      </div>
+      <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-6">
+        Your AI agent is fast.<br>
+        <span class="gradient-text">Your repo is not ready.</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+        I harden your repo for <strong class="text-white">Windsurf / Cursor / Codex</strong> in 48 hours: agent rules, CI gates, PR templates, safety workflows, and a repo-readiness report.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#pricing" class="bg-brand-500 hover:bg-brand-600 text-surface-950 font-bold px-8 py-4 rounded-xl text-lg transition glow-green">
+          Get the $149 Audit →
+        </a>
+        <a href="#deliverables" class="border border-white/10 hover:border-white/20 text-white font-medium px-8 py-4 rounded-xl text-lg transition">
+          See What's Included
+        </a>
+      </div>
+      <p class="mt-6 text-sm text-gray-500">No prod access needed. Read-only audit first.</p>
+    </div>
+  </section>
+
+  <!-- Pain Point -->
+  <section class="py-20 px-6 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Sound familiar?</h2>
+          <ul class="space-y-4 text-gray-300">
+            <li class="flex items-start gap-3">
+              <span class="text-red-400 mt-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+              </span>
+              <span>Agent deleted a file you didn't notice until production broke</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400 mt-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+              </span>
+              <span>AI rewrote your architecture without asking — and broke 3 features</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400 mt-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+              </span>
+              <span>Tests are failing but you ship anyway because "the agent said it works"</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400 mt-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+              </span>
+              <span>Technical debt is piling up and you're the only one who can review PRs</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="text-red-400 mt-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+              </span>
+              <span>An investor or co-founder looks at the repo and it's a mess</span>
+            </li>
+          </ul>
+        </div>
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-6 font-mono text-sm">
+          <div class="flex items-center gap-2 mb-4 text-gray-500">
+            <span class="w-3 h-3 rounded-full bg-red-500/60"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500/60"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500/60"></span>
+            <span class="ml-2">repo_readiness_check.sh</span>
+          </div>
+          <div class="space-y-1.5">
+            <p class="text-red-400">[FAIL] AGENTS.md is missing — agents have no governance rules</p>
+            <p class="text-red-400">[FAIL] No CI/CD workflows — no automated quality gates</p>
+            <p class="text-red-400">[FAIL] .env exists but is NOT in .gitignore</p>
+            <p class="text-yellow-400">[WARN] No 'test' script in package.json</p>
+            <p class="text-yellow-400">[WARN] No PR template — agent PRs won't follow a checklist</p>
+            <p class="text-yellow-400">[WARN] No branch protection on main</p>
+            <p class="text-green-400">[PASS] .gitignore exists</p>
+            <p class="text-green-400">[PASS] ESLint config found</p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-white/5">
+            <p class="text-white font-bold">Score: <span class="text-red-400">25/100</span> — Grade D</p>
+            <p class="text-gray-500 mt-1">Not agent-ready — high risk</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who It's For -->
+  <section id="who" class="py-20 px-6 bg-surface-900/50 border-t border-white/5">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Built for teams like yours</h2>
+      <p class="text-gray-400 text-lg mb-12 max-w-2xl mx-auto">1–5 person SaaS teams, indie hackers, and solo founders who ship fast with AI — but need safety rails.</p>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-surface-800 border border-white/5 rounded-xl p-6 card-hover">
+          <div class="w-12 h-12 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-lg mb-2">Solo Founders</h3>
+          <p class="text-gray-400 text-sm">You're the only dev. AI writes code fast but nobody reviews it. You need automated guardrails.</p>
+        </div>
+        <div class="bg-surface-800 border border-white/5 rounded-xl p-6 card-hover">
+          <div class="w-12 h-12 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-lg mb-2">Small SaaS Teams</h3>
+          <p class="text-gray-400 text-sm">1–5 devs using Cursor/Windsurf daily. No CTO, no senior review. Agent output goes straight to prod.</p>
+        </div>
+        <div class="bg-surface-800 border border-white/5 rounded-xl p-6 card-hover">
+          <div class="w-12 h-12 rounded-lg bg-brand-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          </div>
+          <h3 class="text-white font-semibold text-lg mb-2">Indie Hackers &amp; Agencies</h3>
+          <p class="text-gray-400 text-sm">Shipping multiple projects with AI. Each repo needs the same safety discipline — I set it up once.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deliverables -->
+  <section id="deliverables" class="py-20 px-6 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">What you get in 48 hours</h2>
+        <p class="text-gray-400 text-lg max-w-2xl mx-auto">Five concrete deliverables. No fluff, no theory. Production-ready agent governance for your repo.</p>
+      </div>
+      <div class="space-y-8">
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="flex items-start gap-6">
+            <div class="w-14 h-14 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0"><span class="text-red-400 font-bold text-xl">1</span></div>
+            <div class="flex-1">
+              <h3 class="text-white font-bold text-xl mb-2">Repo Risk Audit</h3>
+              <p class="text-gray-400 mb-4">Short, punchy report showing exactly where your repo is vulnerable to AI agent damage.</p>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Test coverage map</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>CI pipeline status</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Secrets leak risk</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Top 10 risky files</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Agent readiness score</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>"5 most likely breakages"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="flex items-start gap-6">
+            <div class="w-14 h-14 rounded-xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center flex-shrink-0"><span class="text-brand-400 font-bold text-xl">2</span></div>
+            <div class="flex-1">
+              <h3 class="text-white font-bold text-xl mb-2">Agent Rules Pack</h3>
+              <p class="text-gray-400 mb-4">Custom governance files that tell AI agents exactly how to work in your repo safely.</p>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><code class="text-brand-400">AGENTS.md</code> — governance constitution</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg><code class="text-brand-400">WINDSURF_RULES.md</code> — allow/deny lists</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Plan → Approve → Patch → Test → Report</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Forbidden actions list</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Prod/DB/secrets no-touch policy</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Diff-first &amp; evidence-based reporting</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="flex items-start gap-6">
+            <div class="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0"><span class="text-blue-400 font-bold text-xl">3</span></div>
+            <div class="flex-1">
+              <h3 class="text-white font-bold text-xl mb-2">CI / Safety Gate Setup</h3>
+              <p class="text-gray-400 mb-4">Automated quality gates that run on every PR — no merge without passing.</p>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>GitHub Actions test gate</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Lint + typecheck gate</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Dependency audit</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Secret scan (Gitleaks)</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>PR template with agent checklist</div>
+                <div class="flex items-center gap-2 text-sm text-gray-300"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Pre-merge safety script</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="flex items-start gap-6">
+            <div class="w-14 h-14 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0"><span class="text-purple-400 font-bold text-xl">4</span></div>
+            <div class="flex-1">
+              <h3 class="text-white font-bold text-xl mb-2">Agent Task Templates</h3>
+              <p class="text-gray-400 mb-4">7 copy-paste prompts that enforce safe agent behavior for every common task type.</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Audit Only</span>
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Implement with Tests</span>
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Fix Failing CI</span>
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Refactor No Behavior Change</span>
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Feature Behind Flag</span>
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Migration (Don't Apply)</span>
+                <span class="bg-surface-700 text-gray-300 px-3 py-1 rounded-lg text-sm">Report with Evidence</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="flex items-start gap-6">
+            <div class="w-14 h-14 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center flex-shrink-0"><span class="text-yellow-400 font-bold text-xl">5</span></div>
+            <div class="flex-1">
+              <h3 class="text-white font-bold text-xl mb-2">30-Min Handoff Call</h3>
+              <p class="text-gray-400">Walk away knowing exactly how to manage your AI agent going forward. Not just files — the knowledge of how to use them.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Before & After -->
+  <section id="before-after" class="py-20 px-6 bg-surface-900/50 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Before &amp; After</h2>
+        <p class="text-gray-400 text-lg">What your repo looks like today vs. after the sprint.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-surface-900 border border-red-500/20 rounded-2xl p-8">
+          <div class="flex items-center gap-3 mb-6"><span class="w-3 h-3 rounded-full bg-red-500"></span><h3 class="text-red-400 font-bold text-lg">BEFORE</h3></div>
+          <ul class="space-y-3 text-gray-400">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>No agent governance — agents can do anything</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>No CI — no automated quality checks</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>Secrets exposed in git</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>~8% test coverage</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>Anyone can push to main</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>Readiness Score: <strong class="text-red-400">25/100</strong></li>
+          </ul>
+        </div>
+        <div class="bg-surface-900 border border-brand-500/20 rounded-2xl p-8">
+          <div class="flex items-center gap-3 mb-6"><span class="w-3 h-3 rounded-full bg-brand-500"></span><h3 class="text-brand-400 font-bold text-lg">AFTER</h3></div>
+          <ul class="space-y-3 text-gray-400">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Full agent governance (AGENTS.md + WINDSURF_RULES.md)</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>5 CI gates (lint, test, typecheck, audit, secret scan)</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Secrets removed from git, .gitignore configured</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>PR template with 11-point safety checklist</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Branch protection on main</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Readiness Score: <strong class="text-brand-400">75/100</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="py-20 px-6 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">How the 48-hour sprint works</h2>
+        <p class="text-gray-400 text-lg">Four phases. Read-only first. You approve every change.</p>
+      </div>
+      <div class="grid md:grid-cols-4 gap-6">
+        <div class="text-center"><div class="w-16 h-16 rounded-2xl bg-surface-800 border border-white/5 flex items-center justify-center mx-auto mb-4"><span class="text-brand-400 font-bold text-2xl">1</span></div><h3 class="text-white font-semibold mb-2">Audit</h3><p class="text-gray-400 text-sm">Read-only scan of your repo. No edits. I map risks, tests, CI, and agent readiness.</p><p class="text-gray-500 text-xs mt-2">~4 hours</p></div>
+        <div class="text-center"><div class="w-16 h-16 rounded-2xl bg-surface-800 border border-white/5 flex items-center justify-center mx-auto mb-4"><span class="text-brand-400 font-bold text-2xl">2</span></div><h3 class="text-white font-semibold mb-2">Plan</h3><p class="text-gray-400 text-sm">I present the audit report + implementation plan. You approve before I touch anything.</p><p class="text-gray-500 text-xs mt-2">~2 hours</p></div>
+        <div class="text-center"><div class="w-16 h-16 rounded-2xl bg-surface-800 border border-white/5 flex items-center justify-center mx-auto mb-4"><span class="text-brand-400 font-bold text-2xl">3</span></div><h3 class="text-white font-semibold mb-2">Patch</h3><p class="text-gray-400 text-sm">I create governance files, CI gates, PR templates, and safety scripts. All via PR — you merge.</p><p class="text-gray-500 text-xs mt-2">~24 hours</p></div>
+        <div class="text-center"><div class="w-16 h-16 rounded-2xl bg-surface-800 border border-white/5 flex items-center justify-center mx-auto mb-4"><span class="text-brand-400 font-bold text-2xl">4</span></div><h3 class="text-white font-semibold mb-2">Handoff</h3><p class="text-gray-400 text-sm">30-min call. You walk away knowing how to manage your agent safely going forward.</p><p class="text-gray-500 text-xs mt-2">~30 min</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-20 px-6 bg-surface-900/50 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Simple pricing. No surprises.</h2>
+        <p class="text-gray-400 text-lg">First 5 beta customers get the full sprint at a discount in exchange for a testimonial.</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="text-sm text-gray-400 font-medium mb-2">MINI AUDIT</div>
+          <div class="flex items-baseline gap-1 mb-4"><span class="text-4xl font-black text-white">$149</span></div>
+          <p class="text-gray-400 text-sm mb-6">Quick risk snapshot. Great starting point if you're not sure you need the full sprint.</p>
+          <ul class="space-y-3 text-sm text-gray-300 mb-8">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Repo risk audit report</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Agent readiness score</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Top 5 breakage scenarios</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Read-only — no code changes</li>
+          </ul>
+          <a href="mailto:hello@agentopssprint.com?subject=Mini%20Audit" class="block text-center border border-white/10 hover:border-brand-500/50 text-white font-semibold py-3 rounded-xl transition">Get the Audit</a>
+        </div>
+        <div class="bg-surface-900 border-2 border-brand-500/30 rounded-2xl p-8 relative glow-green card-hover">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-500 text-surface-950 text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
+          <div class="text-sm text-brand-400 font-medium mb-2">48H AGENT-SAFE SPRINT</div>
+          <div class="flex items-baseline gap-1 mb-1"><span class="text-4xl font-black text-white">$497</span></div>
+          <div class="text-sm text-gray-500 mb-4 line-through">$997 — Beta price for first 5 customers</div>
+          <p class="text-gray-400 text-sm mb-6">Full repo hardening + agent governance in 48 hours. Everything you need to use AI agents safely.</p>
+          <ul class="space-y-3 text-sm text-gray-300 mb-8">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Everything in Mini Audit</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>AGENTS.md + WINDSURF_RULES.md</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>CI safety gates (5 checks)</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>PR template + 7 task templates</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Pre-merge safety script</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>30-min handoff call</li>
+          </ul>
+          <a href="mailto:hello@agentopssprint.com?subject=48h%20Agent-Safe%20Sprint%20%E2%80%94%20Beta" class="block text-center bg-brand-500 hover:bg-brand-600 text-surface-950 font-bold py-3 rounded-xl transition">Book the Sprint →</a>
+        </div>
+        <div class="bg-surface-900 border border-white/5 rounded-2xl p-8 card-hover">
+          <div class="text-sm text-gray-400 font-medium mb-2">MONTHLY RETAINER</div>
+          <div class="flex items-baseline gap-1 mb-4"><span class="text-4xl font-black text-white">$750</span><span class="text-gray-400">/mo</span></div>
+          <p class="text-gray-400 text-sm mb-6">Ongoing agent governance as your repo evolves. Keep your safety rails up to date.</p>
+          <ul class="space-y-3 text-sm text-gray-300 mb-8">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Monthly repo health audit</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>AGENTS.md updates as codebase grows</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>CI gate adjustments</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-brand-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>Priority incident support</li>
+          </ul>
+          <a href="mailto:hello@agentopssprint.com?subject=Monthly%20AgentOps%20Retainer" class="block text-center border border-white/10 hover:border-brand-500/50 text-white font-semibold py-3 rounded-xl transition">Get Retainer</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Proof -->
+  <section class="py-16 px-6 border-t border-white/5">
+    <div class="max-w-5xl mx-auto">
+      <div class="grid md:grid-cols-3 gap-8 text-center">
+        <div><div class="text-4xl font-black text-brand-400 mb-2">84%</div><p class="text-gray-400 text-sm">of developers use or plan to use AI coding tools (Stack Overflow 2025)</p></div>
+        <div><div class="text-4xl font-black text-red-400 mb-2">46%</div><p class="text-gray-400 text-sm">don't trust AI output accuracy (Stack Overflow 2025)</p></div>
+        <div><div class="text-4xl font-black text-yellow-400 mb-2">45%</div><p class="text-gray-400 text-sm">of AI-generated code has security flaws (Veracode 2025)</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-20 px-6 bg-surface-900/50 border-t border-white/5">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-12 text-center">FAQ</h2>
+      <div class="space-y-6">
+        <div class="border border-white/5 rounded-xl p-6"><h3 class="text-white font-semibold mb-2">Can't I just ask ChatGPT to generate these files?</h3><p class="text-gray-400 text-sm">You can generate generic files. But the value isn't the files — it's the right guardrails for your specific repo: the correct test gates, the right forbidden zones, the actual CI commands that work with your stack, and the handoff that teaches you how to use it all. Generic templates break on real repos.</p></div>
+        <div class="border border-white/5 rounded-xl p-6"><h3 class="text-white font-semibold mb-2">Do you need access to my production environment?</h3><p class="text-gray-400 text-sm">No. The audit is read-only on your codebase. I never touch production, databases, or secrets. All changes go through PRs that you review and merge.</p></div>
+        <div class="border border-white/5 rounded-xl p-6"><h3 class="text-white font-semibold mb-2">What if my repo doesn't have tests or CI at all?</h3><p class="text-gray-400 text-sm">That's exactly who this is for. The audit will flag the gaps, and the sprint will set up the minimum viable safety net. You don't need 100% coverage — you need the critical paths covered and the gates in place so things don't get worse.</p></div>
+        <div class="border border-white/5 rounded-xl p-6"><h3 class="text-white font-semibold mb-2">Does this fix bugs or add features?</h3><p class="text-gray-400 text-sm">No. This is strictly agent governance, CI safety, and repo hardening. No application feature work. That's a different engagement — and one that will go much better once your repo has proper agent guardrails.</p></div>
+        <div class="border border-white/5 rounded-xl p-6"><h3 class="text-white font-semibold mb-2">What happens after the 48 hours?</h3><p class="text-gray-400 text-sm">You get the handoff call + a 7-day improvement plan. If you want ongoing support, the Monthly AgentOps Retainer keeps your governance up to date as your codebase grows. But you own all the files and can maintain them yourself.</p></div>
+        <div class="border border-white/5 rounded-xl p-6"><h3 class="text-white font-semibold mb-2">I'm not using Windsurf — I use Cursor/Codex. Does this still work?</h3><p class="text-gray-400 text-sm">Yes. AGENTS.md is tool-agnostic governance. The WINDSURF_RULES.md can be adapted for Cursor (.cursorrules) or Codex. The CI gates, PR templates, and safety scripts work regardless of which agent you use.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-6 border-t border-white/5">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Stop hoping your AI agent won't break things.</h2>
+      <p class="text-gray-400 text-lg mb-8">Set up the guardrails. Ship fast AND safe.</p>
+      <a href="mailto:hello@agentopssprint.com?subject=Agent-Safe%20Repo%20Sprint%20%E2%80%94%20Let's%20Talk" class="inline-block bg-brand-500 hover:bg-brand-600 text-surface-950 font-bold px-10 py-4 rounded-xl text-lg transition glow-green">Get Your Repo Agent-Safe →</a>
+      <p class="mt-6 text-sm text-gray-500">First 5 beta customers: $497 (regularly $997). Includes testimonial + case study participation.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 border-t border-white/5">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-6 h-6 rounded bg-brand-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-surface-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A10.97 10.97 0 0012 2C6.477 2 2 6.477 2 12s4.477 10 10 10c.77 0 1.52-.078 2.245-.226a1 1 0 00.814-.814A10.97 10.97 0 0022 12c0-1.5-.3-2.94-.838-4.262a1 1 0 00-.814-.814z"/></svg>
+        </div>
+        <span class="text-gray-400 text-sm">AgentOps Sprint — Agent governance for small software teams.</span>
+      </div>
+      <div class="flex items-center gap-6 text-sm text-gray-500">
+        <a href="mailto:hello@agentopssprint.com" class="hover:text-white transition">Email</a>
+        <a href="https://twitter.com" class="hover:text-white transition" target="_blank">Twitter</a>
+        <a href="https://github.com" class="hover:text-white transition" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
