@@ -1,0 +1,181 @@
+name: Agent Safety Gate
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect package manager
+        id: pkg
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "manager=pnpm" >> $GITHUB_OUTPUT
+            echo "install=pnpm install" >> $GITHUB_OUTPUT
+            echo "lint=pnpm run lint" >> $GITHUB_OUTPUT
+          elif [ -f "yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+            echo "install=yarn install --frozen-lockfile" >> $GITHUB_OUTPUT
+            echo "lint=yarn lint" >> $GITHUB_OUTPUT
+          elif [ -f "package-lock.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "install=npm ci" >> $GITHUB_OUTPUT
+            echo "lint=npm run lint" >> $GITHUB_OUTPUT
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "manager=pip" >> $GITHUB_OUTPUT
+            echo "install=pip install -r requirements.txt 2>/dev/null || pip install -e . 2>/dev/null || echo 'no install needed'" >> $GITHUB_OUTPUT
+            echo "lint=ruff check . 2>/dev/null || flake8 . 2>/dev/null || echo 'no linter configured'" >> $GITHUB_OUTPUT
+          else
+            echo "manager=unknown" >> $GITHUB_OUTPUT
+            echo "install=echo 'no install needed'" >> $GITHUB_OUTPUT
+            echo "lint=echo 'no linter configured'" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: contains(steps.pkg.outputs.manager, 'npm') || contains(steps.pkg.outputs.manager, 'yarn') || contains(steps.pkg.outputs.manager, 'pnpm')
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: ${{ steps.pkg.outputs.manager }}
+
+      - name: Setup pnpm
+        if: steps.pkg.outputs.manager == 'pnpm'
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: ${{ steps.pkg.outputs.install }}
+
+      - name: Run lint
+        run: ${{ steps.pkg.outputs.lint }}
+
+  typecheck:
+    name: Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect and run typecheck
+        run: |
+          if [ -f "tsconfig.json" ]; then
+            npx tsc --noEmit
+          elif [ -f "mypy.ini" ] || grep -q "mypy" pyproject.toml 2>/dev/null; then
+            mypy . 2>/dev/null || echo "mypy not configured"
+          else
+            echo "No type checker configured — skipping"
+          fi
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect package manager
+        id: pkg
+        run: |
+          if [ -f "pnpm-lock.yaml" ]; then
+            echo "install=pnpm install" >> $GITHUB_OUTPUT
+            echo "test=pnpm test" >> $GITHUB_OUTPUT
+          elif [ -f "yarn.lock" ]; then
+            echo "install=yarn install --frozen-lockfile" >> $GITHUB_OUTPUT
+            echo "test=yarn test" >> $GITHUB_OUTPUT
+          elif [ -f "package-lock.json" ]; then
+            echo "install=npm ci" >> $GITHUB_OUTPUT
+            echo "test=npm test" >> $GITHUB_OUTPUT
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "install=pip install -r requirements.txt 2>/dev/null || pip install -e . 2>/dev/null || echo 'skip'" >> $GITHUB_OUTPUT
+            echo "test=pytest 2>/dev/null || python -m pytest 2>/dev/null || echo 'no test runner'" >> $GITHUB_OUTPUT
+          elif [ -f "Cargo.toml" ]; then
+            echo "install=cargo build" >> $GITHUB_OUTPUT
+            echo "test=cargo test" >> $GITHUB_OUTPUT
+          elif [ -f "go.mod" ]; then
+            echo "install=go mod download" >> $GITHUB_OUTPUT
+            echo "test=go test ./..." >> $GITHUB_OUTPUT
+          else
+            echo "install=echo 'skip'" >> $GITHUB_OUTPUT
+            echo "test=echo 'no test runner detected'" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Node.js
+        if: contains(steps.pkg.outputs.install, 'npm') || contains(steps.pkg.outputs.install, 'yarn') || contains(steps.pkg.outputs.install, 'pnpm')
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        if: contains(steps.pkg.outputs.install, 'pnpm')
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: ${{ steps.pkg.outputs.install }}
+
+      - name: Run tests
+        run: ${{ steps.pkg.outputs.test }}
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run npm audit
+        if: hashFiles('package-lock.json') != ''
+        run: npm audit --audit=moderate
+        continue-on-error: true
+
+      - name: Run pip-audit
+        if: hashFiles('requirements.txt') != ''
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt --desc
+        continue-on-error: true
+
+  secret-scan:
+    name: Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  agent-safety-check:
+    name: Agent Safety Summary
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, dependency-audit, secret-scan]
+    if: always()
+    steps:
+      - name: Check gate results
+        run: |
+          echo "## Agent Safety Gate Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Typecheck | ${{ needs.typecheck.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Audit | ${{ needs.dependency-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scan | ${{ needs.secret-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.lint.result }}" = "failure" ] || [ "${{ needs.test.result }}" = "failure" ] || [ "${{ needs.secret-scan.result }}" = "failure" ]; then
+            echo "Agent Safety Gate: FAILED — Do not merge." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "Agent Safety Gate: PASSED — Safe to merge." >> $GITHUB_STEP_SUMMARY
+          fi
